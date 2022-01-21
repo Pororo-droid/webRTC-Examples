@@ -1,70 +1,75 @@
-//현재는 callFunction() 콘솔로 콜해야 실행이됨.
-//AWAIT으로 변경해봐
+const constraints = {
+    video: true
+}
 
-// STUN / TURN  Servers
 const servers = {
     'iceServers': [{
         'urls': 'stun:stun.l.google.com:19302'
     }]
 }
 
-const constraints = {
-    video: true
-};
+const local_video = document.getElementById('localVideo');
+const remote_video = document.getElementById('remoteVideo');
 
-const localVideo = document.getElementById('localVideo');
-const remoteVideo = document.getElementById('remoteVideo');
+let local_stream;
+let local_peer_connection;
+let remote_peer_connection;
 
-let localStream;
-let localPeerConnection = new RTCPeerConnection(servers);
-let remotePeerConnection = new RTCPeerConnection(servers);
-
-// remotePeerConnection.addEventListener('track', async(event)=>{
-//     console.log('remote ',event)
-//     let remoteStream = event;
-//     remoteVideo.srcObejct = remoteStream;
-// })
-remotePeerConnection.ontrack = gotRemoteStream;
-
-function gotRemoteStream(e) {
-    console.log('gotRemoteStream',e);
-    remoteVideo.srcObject = e.streams[0];
+const offer_options = {
+    offerToReceiveVideo: 1
 }
 
-function getStream(){
+function gotStream(stream){
+    local_video.srcObject = stream;
+    local_stream = stream;
+}
+
+function gotRemoteStream(stream){
+    remote_video.srcObject = stream.streams[0];
+}
+
+function connect(){
+    local_peer_connection = new RTCPeerConnection(servers);
+    local_peer_connection.onicecandidate = event => onIceCandidate(local_peer_connection, event);
+
+    remote_peer_connection = new RTCPeerConnection(servers);
+    remote_peer_connection.onicecandidate = event => onIceCandidate(remote_peer_connection,event);
+    remote_peer_connection.ontrack = gotRemoteStream;
+
+    local_stream.getTracks().forEach(track => local_peer_connection.addTrack(track, local_stream));
+    local_peer_connection.createOffer(offer_options)
+    .then(offerResponse);
+}
+
+function init(){
     navigator.mediaDevices.getUserMedia(constraints)
-    .then(getLocalStream);
+    .then(gotStream)
+    .then(connect)
+}
+function offerResponse(description) {
+    local_peer_connection.setLocalDescription(description);
+    remote_peer_connection.setRemoteDescription(description);
+    remote_peer_connection.createAnswer().then(answerResponse);
+  }
+
+function answerResponse(description) {
+    remote_peer_connection.setLocalDescription(description);
+    local_peer_connection.setRemoteDescription(description);
 }
 
-function getLocalStream(stream){
-    console.log('Local stream',stream);
-    localVideo.srcObject = stream;
-    localStream = stream;
+function iceStateCallback1() {
+    let iceState;
+    if (local_peer_connection) {
+        iceState = local_peer_connection.iceConnectionState;
+    }
+}
+function onIceCandidate(pc, event) {
+getOtherPc(pc)
+    .addIceCandidate(event.candidate)
+
 }
 
-function callFunction(){
-    // const videoTracks = localStream.getVideoTracks();
-    // const audioTracks = localStream.getAudioTracks();
-    // console.log(videoTracks);
-    const offer = localPeerConnection.createOffer().then(onCreateOfferSuccess);
-    console.log('offer',offer);
-
-    localStream.getTracks().forEach(track => {
-        console.log('got local track',track);
-        localPeerConnection.addTrack(track, localStream);
-    });
-}
-
-async function onCreateOfferSuccess(desc){
-    await localPeerConnection.setLocalDescription(desc);
-    await remotePeerConnection.setRemoteDescription(desc);
-    const answer = await remotePeerConnection.createAnswer();
-    await onCreateAnswerSuccess(answer);
-}
-
-async function onCreateAnswerSuccess(desc){
-    await remotePeerConnection.setLocalDescription(desc);
-    await localPeerConnection.setRemoteDescription(desc);
-}
-
-getStream();
+function getOtherPc(pc) {
+    return (pc === local_peer_connection) ? remote_peer_connection : local_peer_connection;
+  }
+  
