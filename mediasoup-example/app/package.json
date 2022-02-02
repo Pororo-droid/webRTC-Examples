@@ -1,0 +1,23 @@
+{
+  "dependencies": {
+    "express": "4.17.2",
+    "fs": "0.0.1-security",
+    "httpolyglot": "0.1.2",
+    "mediasoup": "3.9.6",
+    "mediasoup-client": "3.6.50",
+    "path": "0.12.7",
+    "socket.io": "4.4.1",
+    "socket.io-client": "4.4.1",
+    "watchify": "4.0.0"
+  },
+  "name": "app",
+  "version": "1.0.0",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "watchify public/index.js -o public/bundle.js -v"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
