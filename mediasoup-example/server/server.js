@@ -120,6 +120,7 @@ io.on("connection", function(socket){
         callback({ id: producer.id });
     })
 
+    // consumer transport 생성
     socket.on('createConsumerTransport', async (data, callback) => {
         try {
           const { transport, params } = await createWebRtcTransport();
@@ -131,6 +132,9 @@ io.on("connection", function(socket){
         }
     });
 
+    // transport.connect
+    // Provides the transport with the remote endpoint's 
+    // transport parameters
     socket.on('connectConsumerTransport', async (data, callback) => {
         await consumer_transport.connect({ dtlsParameters: data.dtlsParameters });
         callback();
@@ -198,6 +202,10 @@ async function runMediasoupWorker() {
     console.log("router ID : ",router.id);
 }
 
+// consumer 생성
+// transport.consumer =>
+// Instructs the router to send audio or video RTP
+// (or SRTP depending on the transport class)
 async function createConsumer(producer, rtpCapabilities) {
     if (!router.canConsume(
       {
