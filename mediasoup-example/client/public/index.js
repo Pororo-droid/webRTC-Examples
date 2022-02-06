@@ -29,8 +29,8 @@ async function getUserMedia(){
     return stream;
 }
 
-// LocalStream 가져오기
-// 구독 실행
+// 5. LocalStream 가져오기
+// 해당 내용은 webRTC와 동일함.
 async function localStream(){
 
     local_stream = await getUserMedia();
@@ -41,8 +41,9 @@ async function localStream(){
     // subscribe();
 }
 
-// Transport 생성
-// Local Stream 불러오기
+// 4. Transport 생성
+// 서버에서 받아온 producer transport의 params를 이용하여
+// 미디어를 보낼 transport를 생성한다.
 async function createProduceTransport(transport_data){
     transport = device.createSendTransport(transport_data);
     transport.on('connect', async ({ dtlsParameters }, callback, errback) => {
@@ -75,15 +76,16 @@ async function createProduceTransport(transport_data){
     console.log("Produce Transport Created");
 }
 
-// RTP Capabilities를 받아와서 Device생성. 
-// Transport Data를 받아온다.
-// createTransport 함수를 호출한다.
+// 1. 서버 라우터의 rtp capabilites를 받아와서 아래 내용을 처리.
+// 해당 버전에서는 init()처럼 사용된다. => 수정필요.
 socket.on('getRtpCapabilities',async (data) =>{
     console.log("RTP Capabailities : ",data.rtpCapabilities);
     rtp_capabilities = data.rtpCapabilities;
 
     await createDevice(rtp_capabilities);
     
+    // 3. Producer Transport가 없다면, 서버측에 Producer Transport를
+    // 생성할것을 요청, 콜백을 통해 producer transport의 params를 가져온다
     const transport_data = await socket.request('createProducerTransport', {});
     console.log("Produce Transport",transport_data);
 
@@ -94,6 +96,8 @@ socket.on('getRtpCapabilities',async (data) =>{
     await subscribe();
 })
 
+// 2. 새로운 Device를 생성
+// device.load()를 통해 라우터의 정보를 알아낸다.
 async function createDevice(rtp_capabilities){
     try {
         device = new mediasoup.Device()
@@ -109,6 +113,7 @@ async function createDevice(rtp_capabilities){
     }
 }
 
+// 6. 이제 서버에서 받아온다.
 async function subscribe(){
     const data = await socket.request('createConsumerTransport',{
         forceTcp: false,
@@ -133,7 +138,6 @@ async function subscribe(){
         if(state == "connected"){
             let remote_video = document.getElementById("remoteVideo");
             remote_video.srcObject = await remote_stream;
-            // document.querySelector('#remote_video').srcObject = await stream;
             await socket.request('resume');
         }
       });

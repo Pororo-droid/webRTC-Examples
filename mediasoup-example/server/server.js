@@ -11,6 +11,7 @@ let router;
 let producer_transport;
 let consumer_transport;
 
+// 서버시작하자 마자 Router & Worker 생성.
 (async() => {
     try{
         await runMediasoupWorker();
@@ -29,7 +30,7 @@ const io = socket(server, {
     }
 });
 
-// webRTC Transport 새엇ㅇ
+// webRTC Transport 생성
 async function createWebRtcTransport() {
     try {
         const webRtcTransport_options = {
@@ -110,6 +111,9 @@ io.on("connection", function(socket){
         callback();
     })
 
+    // producer 생성
+    // transport.producer => 
+    // Instructs the router to receive audio or video RTP
     socket.on("produce",async(data,callback) => {
         const {kind, rtpParameters} = data;
         producer = await producer_transport.produce({ kind, rtpParameters });
@@ -142,6 +146,7 @@ io.on("connection", function(socket){
     });
   
 })
+
 // Worker & Router 생성
 async function runMediasoupWorker() {
     console.log("Mediasoup worker & router creating ....");
