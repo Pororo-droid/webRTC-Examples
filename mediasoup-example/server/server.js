@@ -87,10 +87,12 @@ io.on("connection", function(socket){
     });
 
     // 라우터의 rtp Capabilties 전송
-    console.log("Sending router rtpCapabilities : ",router.rtpCapabilities)
-    socket.emit("getRtpCapabilities",{
-        rtpCapabilities: router.rtpCapabilities
-    });
+    socket.on("getRtpCapabilities",async(data,callback) => {
+      console.log("Sending Rtp Capabilities...")
+      // callback({rtpCapabilities : router.rtpCapabilities})
+      callback({rtpCapabilities : router.rtpCapabilities})
+      console.log("Rtp Capabilties Sended");
+    })
 
     // Produce Transport 생성
     socket.on("createProducerTransport",async(data,callback) => {
