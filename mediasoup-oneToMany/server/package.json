@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "express": "4.17.2",
+    "fs": "0.0.1-security",
+    "https": "1.0.0",
+    "mediasoup": "3.9.6",
+    "socket.io": "4.4.1"
+  }
+}

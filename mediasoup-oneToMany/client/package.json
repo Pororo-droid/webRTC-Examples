@@ -1,0 +1,21 @@
+{
+  "name": "client",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "watchify public/main.js -o public/bundle.js -v"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "browserify": "17.0.0",
+    "express": "4.17.2",
+    "httpolyglot": "0.1.2",
+    "mediasoup-client": "3.6.50",
+    "path": "0.12.7",
+    "socket.io-client": "4.4.1",
+    "watchify": "4.0.0"
+  }
+}
