@@ -12,7 +12,7 @@ const socketPromise = function(socket) {
 let rtp_capabilities;
 let transport_data;
 let producer_transport;
-let producer;
+
 
 let consumer_list = []
 let remote_stream_list = []

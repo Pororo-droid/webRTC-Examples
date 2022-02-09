@@ -13,8 +13,6 @@ let producer;
 
 let consumer_transport_list = [];
 let consumer_list = [];
-// let consumer_transport;
-// let consumer;
 
 (async() => {
     try{
@@ -40,7 +38,6 @@ io.on("connection",(socket) => {
 
     socket.on("getRtpCapabilities",async(data,callback) => {
         console.log("Sending Rtp Capabilities...")
-        // callback({rtpCapabilities : router.rtpCapabilities})
         callback({rtpCapabilities : router.rtpCapabilities})
         console.log("Rtp Capabilties Sended");
     })
@@ -116,9 +113,7 @@ io.on("connection",(socket) => {
     })
 
     socket.on("consume", async(data,callback) =>{
-        console.log(data);
         const result = await createConsumer(producer, data.rtpCapabilities, data.id)
-        // console.log("consume result : ",result);
         callback(result);
     })
 })
@@ -237,6 +232,17 @@ async function createConsumer(producer, rtpCapabilities, consumer_transport_id){
             rtpCapabilities,
             paused: producer.kind === 'video',
         });
+
+        consumer.on("transportclose",() =>{
+            console.log("Consumer Closed ID : ",consumer.id);
+            for(let i = 0; i < consumer_list.length; i++){
+                if(consumer_list[i].id == consumer.id){
+                    consumer_list[i].splice(i,1);
+                    console.log("Left : ",consumer_list.length)
+                    break;
+                }
+            }
+        })
     }catch(error) {
         console.error('consume failed',error);
         return;
