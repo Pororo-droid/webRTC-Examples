@@ -17657,27 +17657,23 @@ socket.on("connection-success",async ({socketId}) => {
     // device.load()를 통해 라우터의 정보를 알아낸다.
     await createDevice();
 
-    // test
+    // 3. Server의 Producer를 토대로 새로운 consumer들을 생성.
     await getRemoteStreams();
 
-    // 3. Producer Transport가 없다면, 서버측에 Producer Transport를
+    // 4. Producer Transport가 없다면, 서버측에 Producer Transport를
     // 생성할것을 요청, 콜백을 통해 producer transport의 params를 가져온다
     await getTransportData();
     
-    // 4. Transport 생성
+    // 5. Transport 생성
     // 서버에서 받아온 producer transport의 params를 이용하여
     // 미디어를 보낼 transport를 생성한다.
     await createProduceTransport();
 
-    // 5. LocalStream 가져오기
+    // 6. LocalStream 가져오기
     // 해당 내용은 webRTC와 동일함.
     await getLocalStream();
 
-    // 6. 이제 서버에서 받아온다.
-    // await subscribe();
-    // await subscribe();
-
-    // 7. 끝나면 역으로 다른 소켓들한테 consuming 요청
+    // 7. 다른 소켓들한테 consuming 요청 요구
     await broadcastProdcuer();
 
 })

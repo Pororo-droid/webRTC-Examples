@@ -169,7 +169,6 @@ async function createProduceTransport(){
         if(state == "connected"){
             let local_video = document.getElementById('localVideo');
             local_video.srcObject = local_stream;
-            console.log("1");
         }
     })
 

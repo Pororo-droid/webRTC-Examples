@@ -122,7 +122,7 @@ io.on("connection",(socket) => {
                 break;
             }
         }
-        // console.log(consumer_transport);
+
         await consumer_transport.connect({ dtlsParameters: data.dtlsParameters });
         callback();
     })
@@ -149,6 +149,18 @@ io.on("connection",(socket) => {
         console.log(data.producerId);
         const result = await createConsumer(data.rtpCapabilities, data.id, data.producerId, socket.id)
         callback(result);
+    })
+
+    socket.on("disconnect",() => {
+        console.log("socket disconnected : ",socket.id);
+        
+        // delete consumer;
+        delete consumer_dict[socket.id];
+        delete consumer_transport_dict[socket.id];
+
+        // delete producer;
+        delete producer_dict[socket.id];
+        delete producer_transport_dict[socket.id];
     })
 })
 
