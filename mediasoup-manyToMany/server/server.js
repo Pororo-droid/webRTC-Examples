@@ -56,8 +56,6 @@ io.on("connection",(socket) => {
             callback(params);
 
             producer_transport_dict[socket.id] = transport;
-            // console.log("=================== PRODUCER TRANSPORT DICTIONARY ===================")
-            // console.log(producer_transport_dict);
             console.log("Succefully created Producer Transport");
         } catch(err){
             console.log(err);
@@ -116,8 +114,7 @@ io.on("connection",(socket) => {
 
     socket.on("connectConsumerTransportList",async(data, callback) => {
         console.log("Connecting Consumer Transport ID : ",data.transportId);
-        // find right consumer transport
-        // let consumer_transport = consumer_transport_dict[socket.id]
+        
         let consumer_transport;
         for(let i = 0; i < consumer_transport_dict[socket.id].length; i++){
             if(consumer_transport_dict[socket.id][i].id == data.transportId){
@@ -159,14 +156,9 @@ io.on("connection",(socket) => {
 async function createConsumer(rtpCapabilities, consumer_transport_id, producer_id, socket_id){
     console.log("===================== CREATING CONSUMER =====================");
     console.log("GOT PRODUCER ID : ",producer_id)
-    console.log(consumer_transport_id,socket_id);
-    // for(var key in producer_dict){
-    //     console.log(producer_dict[key].id)
-    // }
 
     if (!router.canConsume(
         {
-        //   producerId: producer.id,
           producerId: producer_id,
           rtpCapabilities,
         })
@@ -198,13 +190,6 @@ async function createConsumer(rtpCapabilities, consumer_transport_id, producer_i
 
         created_consumer.on("transportclose",() =>{
             console.log("Consumer Closed ID : ",created_consumer.id);
-            // for(let i = 0; i < consumer_list.length; i++){
-            //     if(consumer_list[i].id == consumer2.id){
-            //         consumer_list[i].splice(i,1);
-            //         console.log("Left : ",consumer_list.length)
-            //         break;
-            //     }
-            // }
         })
     }catch(error) {
         console.error('consume failed',error);
@@ -296,12 +281,9 @@ async function createWebRtcTransport() {
             }
         })
         
-        transport.on("transportclose", () => {
-            console.log('transport closed');
+        transport.on('close', () => {
+            console.log('transport closed')
         })
-        // transport.on('close', () => {
-        //     console.log('transport closed')
-        // })
 
         return {
             transport,
