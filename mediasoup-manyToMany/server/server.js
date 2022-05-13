@@ -14,7 +14,7 @@ let producer_transport_dict = {};
 
 let consumer_dict = {};
 let consumer_transport_dict = {};
-
+let socketIdList = {};
 (async() => {
     try{
         await runMediasoupWorker();
@@ -26,8 +26,7 @@ let consumer_transport_dict = {};
 // allow cors
 const io = socket(server, {
     cors: {
-        origin:'*',
-        methods: ["GET","POST"]
+        origin:'*'
     }
 });
 
@@ -43,12 +42,20 @@ io.on("connection",(socket) => {
 
     socket.on("getRtpCapabilities",async(data,callback) => {
         console.log("Sending Rtp Capabilities...")
+        if(socketIdList[socket.id] == true){
+            callback({rtpCapabilities : false})    
+        }
+        socketIdList[socket.id] = true;
         callback({rtpCapabilities : router.rtpCapabilities})
         console.log("Rtp Capabilties Sended");
     })
 
     socket.on("createProducerTransport",async(data,callback) =>{
         try{
+            console.log(producer_transport_dict[socket.id])
+            if(producer_transport_dict[socket.id]){
+                callback({error: "exists"})
+            }
             console.log("Creating Producer Transport...");
             const { transport, params } = await createWebRtcTransport();
             producer_transport = transport;
@@ -58,7 +65,7 @@ io.on("connection",(socket) => {
             producer_transport_dict[socket.id] = transport;
             console.log("Succefully created Producer Transport");
         } catch(err){
-            console.log(err);
+            console.log("error",err);
             callback({error : err.message })
         }
     })
@@ -75,12 +82,12 @@ io.on("connection",(socket) => {
         producer = await producer_transport.produce({ kind, rtpParameters });
         producer_dict[socket.id] = producer
         console.log("PRODUCER : ")
-        console.log(producer.id);
         callback({ id : producer.id });
     })
 
     socket.on("createConsumerTransport",async(data,callback)=>{
         try{
+            console.log("22222222222")
             const { transport, params } = await createWebRtcTransport();
             console.log("NEW CONSUMER TRANSPORT");
             console.log(transport.id);
@@ -98,7 +105,8 @@ io.on("connection",(socket) => {
         transport_list = []
         try{
             for(var key in producer_dict){
-                const { transport,params } = await createWebRtcTransport();
+                console.log("1111111111111")
+                const { transport,params } = await createWebRtcTransport()
                 console.log("New Consumer Transport ID : ",transport.id);
                 
                 result.push([params, producer_dict[key].id])
@@ -116,6 +124,7 @@ io.on("connection",(socket) => {
         console.log("Connecting Consumer Transport ID : ",data.transportId);
         
         let consumer_transport;
+        console.log("CONUSMER LENGTH : ",consumer_transport_dict[socket.id].length)
         for(let i = 0; i < consumer_transport_dict[socket.id].length; i++){
             if(consumer_transport_dict[socket.id][i].id == data.transportId){
                 consumer_transport = consumer_transport_dict[socket.id][i];
@@ -239,7 +248,7 @@ async function runMediasoupWorker(){
             'rtcp'
           ],
         rtcMinPort: 2000,
-        rtcMaxPort: 2020,
+        rtcMaxPort: 3000,
     });
 
     worker.on('died', () => {
@@ -272,21 +281,24 @@ async function runMediasoupWorker(){
 }
 
 async function createWebRtcTransport() {
+    console.log("3333333333333333");
     try{
         const webRtcTransport_options = {
             listenIps: [
               {
                 ip: '0.0.0.0', // replace with relevant IP address
                 announcedIp: '127.0.0.1',
+                //ip: '3.80.83.116', // replace with relevant IP address
+                // announcedIp: '3.80.83.116',
               }
             ],
             enableUdp: true,
             enableTcp: true,
             preferUdp: true,
         }
-
+        console.log("444444444444444")
         let transport = await router.createWebRtcTransport(webRtcTransport_options);
-
+        console.log("55555555555555555")
         transport.on('dtlsstatechange', dtlsState => {
             if (dtlsState === 'closed') {
               transport.close()
@@ -308,5 +320,6 @@ async function createWebRtcTransport() {
         }
 
     }catch(error){
+        console.log(error)
     }
 }
