@@ -23,7 +23,6 @@ let socketIdList = {};
     }
 })();
 
-// allow cors
 const io = socket(server, {
     cors: {
         origin:'*'
@@ -87,7 +86,6 @@ io.on("connection",(socket) => {
 
     socket.on("createConsumerTransport",async(data,callback)=>{
         try{
-            console.log("22222222222")
             const { transport, params } = await createWebRtcTransport();
             console.log("NEW CONSUMER TRANSPORT");
             console.log(transport.id);
@@ -105,7 +103,6 @@ io.on("connection",(socket) => {
         transport_list = []
         try{
             for(var key in producer_dict){
-                console.log("1111111111111")
                 const { transport,params } = await createWebRtcTransport()
                 console.log("New Consumer Transport ID : ",transport.id);
                 
@@ -247,6 +244,7 @@ async function runMediasoupWorker(){
             'srtp',
             'rtcp'
           ],
+        //  PORT 부족하면 사용.
         rtcMinPort: 2000,
         rtcMaxPort: 3000,
     });
@@ -281,7 +279,6 @@ async function runMediasoupWorker(){
 }
 
 async function createWebRtcTransport() {
-    console.log("3333333333333333");
     try{
         const webRtcTransport_options = {
             listenIps: [
@@ -296,9 +293,7 @@ async function createWebRtcTransport() {
             enableTcp: true,
             preferUdp: true,
         }
-        console.log("444444444444444")
         let transport = await router.createWebRtcTransport(webRtcTransport_options);
-        console.log("55555555555555555")
         transport.on('dtlsstatechange', dtlsState => {
             if (dtlsState === 'closed') {
               transport.close()
